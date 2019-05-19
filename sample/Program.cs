@@ -8,7 +8,7 @@ namespace ConsoleApp.SQLite
         {
             // SQLCipher Encryption is applied to database using DBBrowser for SQLite.
             // DBBrowser for SQLite is free and open source tool to edit the SQLite files. 
-            using (var db = new BloggingContext())            
+            using (var db = new BloggingContext())
             {
                 db.Database.EnsureCreated(); // create new db, if that not exist!
 
@@ -24,6 +24,12 @@ namespace ConsoleApp.SQLite
             }
 
             Console.ReadKey();
-        }        
+            Console.WriteLine("Press any key to remove db password...");
+            BloggingContext.ChangePassword(null);
+            BloggingContext.RemovePassword();
+            Console.WriteLine("Press any key to exit ...");
+            Console.ReadKey();
+
+        }
     }
 }

@@ -11,7 +11,8 @@ namespace ConsoleApp.SQLite
         public DbSet<Blog> Blogs { get; set; }
         public DbSet<Post> Posts { get; set; }
 
-        private SqliteConnection connection;
+        private SqliteConnection Connection { get; set; }
+        private static string Password { get; set; } = "pass123";
 
         public BloggingContext()
         {
@@ -19,31 +20,69 @@ namespace ConsoleApp.SQLite
 
         public BloggingContext(SqliteConnection sqliteConnection)
         {
-            connection = sqliteConnection;
+            Connection = sqliteConnection;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            connection = InitializeSqliteConnection();
-            optionsBuilder.UseSqlite(connection);
+            Connection = InitializeSqliteConnection();
+            optionsBuilder.UseSqlite(Connection);
         }
 
         // SQLCipher Encryption is applied to database using DBBrowser for SQLite.
         // DBBrowser for SQLite is free and open source tool to edit the SQLite files. 
         private static SqliteConnection InitializeSqliteConnection()
         {
-            var connection = new SqliteConnection("Data Source=test.db");
+            var connection = GetConnectionString();
             connection.Open();
-            var password = "Pass123";
-            var command = connection.CreateCommand();
-            command.CommandText = "SELECT quote($password);";
-            command.Parameters.AddWithValue("$password", password);
-            var quotedPassword = (string)command.ExecuteScalar();
+            using (var command = connection.CreateCommand())
+            {
+                command.Parameters.Clear();
+                command.CommandText = $"PRAGMA key = '{Password}';";
+                command.ExecuteNonQuery();
 
-            command.CommandText = "PRAGMA key = " + quotedPassword;
-            command.Parameters.Clear();
-            var result = command.ExecuteNonQuery();
-            return connection;
+                return connection;
+            }
+        }
+
+        public static void RemovePassword()
+        {
+            using (var connection = GetConnectionString())
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.Parameters.Clear();
+                    command.CommandText = $"PRAGMA key='{Password}';";
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = "PRAGMA rekey='';";
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void ChangePassword(string newpass)
+        {
+            using (var connection = GetConnectionString())
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.Parameters.Clear();
+                    command.CommandText = $"PRAGMA key='{Password}';";
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = $"PRAGMA rekey='{newpass}';";
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+
+        private static SqliteConnection GetConnectionString()
+        {
+            return new SqliteConnection("Data Source=test.db");
         }
     }
 }
