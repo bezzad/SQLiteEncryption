@@ -25,7 +25,7 @@ namespace ConsoleApp.SQLite
 
             Console.ReadKey();
             Console.WriteLine("Press any key to remove db password...");
-            BloggingContext.ChangePassword(null);
+//            BloggingContext.ChangePassword("new pass");
             BloggingContext.RemovePassword();
             Console.WriteLine("Press any key to exit ...");
             Console.ReadKey();
