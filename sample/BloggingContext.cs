@@ -32,9 +32,9 @@ namespace ConsoleApp.SQLite
         // DBBrowser for SQLite is free and open source tool to edit the SQLite files. 
         private static SqliteConnection InitializeSqliteConnection()
         {
-            var connection = new SqliteConnection("Data Source=blogging2.db");
+            var connection = new SqliteConnection("Data Source=test.db");
             connection.Open();
-            var password = "Test123";
+            var password = "Pass123";
             var command = connection.CreateCommand();
             command.CommandText = "SELECT quote($password);";
             command.Parameters.AddWithValue("$password", password);
